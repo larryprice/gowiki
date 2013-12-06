@@ -45,6 +45,10 @@ func getTitle(w http.ResponseWriter, r *http.Request) (string, error) {
   return m[2], nil // The title is the second subexpression.
 }
 
+func rootHandler(w http.ResponseWriter, r *http.Request) {
+  http.Redirect(w, r, "/view/FrontPage", http.StatusFound)
+}
+
 func viewHandler(w http.ResponseWriter, r *http.Request, title string) {
   p, err := loadPage(title)
   if err != nil {
@@ -86,6 +90,7 @@ var templates = template.Must(template.ParseFiles("tmpl/edit.html", "tmpl/view.h
 var validPath = regexp.MustCompile("^/(edit|save|view)/([a-zA-Z0-9]+)$")
 
 func main() {
+  http.HandleFunc("/", rootHandler)
   http.HandleFunc("/view/", makeHandler(viewHandler))
   http.HandleFunc("/edit/", makeHandler(editHandler))
   http.HandleFunc("/save/", makeHandler(saveHandler))
