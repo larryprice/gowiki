@@ -55,6 +55,15 @@ func viewHandler(w http.ResponseWriter, r *http.Request, title string) {
     http.Redirect(w, r, "/edit/"+title, http.StatusFound)
     return
   }
+
+  // Although this is functional, the ExecuteTemplate function displays it
+  // as plaintext. Figure out where to actually put it?
+  // p.Body = linkRegexp.ReplaceAllFunc(p.Body, func(str []byte) []byte {
+  //     matched := linkRegexp.FindStringSubmatch(string(str))
+  //     out := []byte("<a href=\"/view/"+matched[1]+"\">PageName</a>")
+  //     return out
+  //   })
+
   renderTemplate(w, "view", p)
 }
 
@@ -88,6 +97,7 @@ func makeHandler(fn func (http.ResponseWriter, *http.Request, string)) http.Hand
 
 var templates = template.Must(template.ParseFiles("tmpl/edit.html", "tmpl/view.html"))
 var validPath = regexp.MustCompile("^/(edit|save|view)/([a-zA-Z0-9]+)$")
+var linkRegexp = regexp.MustCompile("\\[([a-zA-Z0-9]+)\\]")
 
 func main() {
   http.HandleFunc("/", rootHandler)
