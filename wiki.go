@@ -7,11 +7,14 @@ import (
   "net/http"
   "os"
   "regexp"
+
+  "fmt"
 )
 
 type Page struct {
     Title string
     Body  []byte
+    DisplayBody template.HTML
 }
 
 func (p *Page) save() error {
@@ -30,7 +33,9 @@ func loadPage(title string) (*Page, error) {
 }
 
 func renderTemplate(w http.ResponseWriter, tmpl string, p *Page) {
+  fmt.Println("beforeRender")
   err := templates.ExecuteTemplate(w, tmpl+".html", p)
+  fmt.Println("afterRender")
   if err != nil {
     http.Error(w, err.Error(), http.StatusInternalServerError)
   }
@@ -56,13 +61,13 @@ func viewHandler(w http.ResponseWriter, r *http.Request, title string) {
     return
   }
 
-  // Although this is functional, the ExecuteTemplate function displays it
-  // as plaintext. Figure out where to actually put it?
-  // p.Body = linkRegexp.ReplaceAllFunc(p.Body, func(str []byte) []byte {
-  //     matched := linkRegexp.FindStringSubmatch(string(str))
-  //     out := []byte("<a href=\"/view/"+matched[1]+"\">PageName</a>")
-  //     return out
-  //   })
+  escapedBody := []byte(template.HTMLEscapeString(string(p.Body)))
+
+  p.DisplayBody = template.HTML(linkRegexp.ReplaceAllFunc(escapedBody, func(str []byte) []byte {
+      matched := linkRegexp.FindStringSubmatch(string(str))
+      out := []byte("<a href=\"/view/"+matched[1]+"\">"+matched[1]+"</a>")
+      return out
+    }))
 
   renderTemplate(w, "view", p)
 }
