@@ -7,8 +7,6 @@ import (
   "net/http"
   "os"
   "regexp"
-
-  "fmt"
 )
 
 type Page struct {
@@ -33,9 +31,7 @@ func loadPage(title string) (*Page, error) {
 }
 
 func renderTemplate(w http.ResponseWriter, tmpl string, p *Page) {
-  fmt.Println("beforeRender")
   err := templates.ExecuteTemplate(w, tmpl+".html", p)
-  fmt.Println("afterRender")
   if err != nil {
     http.Error(w, err.Error(), http.StatusInternalServerError)
   }
